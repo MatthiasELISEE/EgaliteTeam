@@ -91,7 +91,7 @@ root_dir = "../"
 default_input_dir = root_dir + "../public_data"
 default_output_dir = root_dir + "result_submission"
 default_program_dir = root_dir + "ingestion"
-default_submission_dir = root_dir + "code_DecisionTree"
+default_submission_dir = root_dir + "code_NearestNeighbors"
 
 # =============================================================================
 # =========================== END USER OPTIONS ================================
