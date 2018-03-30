@@ -20,7 +20,7 @@ class model:
     def __init__(self):
         '''
         This constructor is supposed to initialize data members.
-        Use triple quotes for function documentation. 
+        Use triple quotes for function documentation.
         Model is the class called by Codalab.
         This class must have at least a method "fit" and a method "predict".
         '''
@@ -34,7 +34,6 @@ class model:
                 ('predictor', Predictor())
                 ])
         print("MODEL=" + self.mod.__str__())
-
 
     def fit(self, X, y):
         '''
@@ -54,10 +53,10 @@ class model:
         # Do not remove the "debug code" this is for "defensive programming"
         self.num_train_samples = len(X)
         if X.ndim>1: self.num_feat = len(X[0])
-        print("FIT: dim(X)= [{:d}, {:d}]".format(self.num_train_samples, self.num_feat))
+        print("FIT: dim(X)= [{}, {}]".format(self.num_train_samples, self.num_feat))
         num_train_samples = len(y)
         if y.ndim>1: self.num_labels = len(y[0])
-        print("FIT: dim(y)= [{:d}, {:d}]".format(num_train_samples, self.num_labels))
+        print("FIT: dim(y)= [{}, {}]".format(num_train_samples, self.num_labels))
         if (self.num_train_samples != num_train_samples):
             print("ARRGH: number of samples in X and y do not match!")
         
@@ -79,15 +78,15 @@ class model:
         '''
         num_test_samples = len(X)
         if X.ndim>1: num_feat = len(X[0])
-        print("PREDICT input: dim(X)= [{:d}, {:d}]".format(num_test_samples, num_feat))
+        print("PREDICT input: dim(X)= [{}, {}]".format(num_test_samples, num_feat))
         if (self.num_feat != num_feat):
             print("ARRGH: number of features in X does not match training data!")
-   
+  
         Y = self.mod.predict(X)
         
         num_labels = 1
         if Y.ndim>1: num_labels = len(Y[0])
-        print("PREDICT output: dim(y)= [{:d}, {:d}]".format(num_test_samples, self.num_labels))
+        print("PREDICT output: dim(y)= [{}, {}]".format(num_test_samples, self.num_labels))
         if (self.num_labels != num_labels):
             print("ARRGH: number of labels in X does not match training data!")
             
@@ -128,16 +127,22 @@ class Predictor(BaseEstimator):
     def load(self, path="./"):
         self = pickle.load(open(path + '_model.pickle'))
         return self
+    
+class RandomForestPredictor(Predictor):
+    def __init__(self, n_estimators):
+        '''This method initializes the predictor.'''
+        self.mod = RandomForestRegressor(n_estimators = n_estimators, max_depth=10)
+        print("PREDICTOR=" + self.mod.__str__())
  
-from sys import argv, path       
+from sys import argv, path      
 if __name__=="__main__":
     # Modify this class to serve as test
     
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
-        input_dir = "../public_data" # A remplacer par le bon chemin
+        input_dir = "../../public_data" # A remplacer par le bon chemin
         output_dir = "../results" # A remplacer par le bon chemin
-        code_dir = "../starting_kit/ingestion_program" # A remplacer par le bon chemin
-        metric_dir = "../starting_kit/scoring_program" # A remplacer par le bon chemin
+        code_dir = "../ingestion_program" # A remplacer par le bon chemin
+        metric_dir = "../scoring_program" # A remplacer par le bon chemin
     else:
         input_dir = argv[1]
         output_dir = argv[2]
@@ -147,12 +152,17 @@ if __name__=="__main__":
     path.append (code_dir)
     path.append (metric_dir)
     
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import KFold
+    from numpy import zeros
+    import matplotlib.pyplot as plt
+    
     with open(metric_dir + '/metric.txt', 'r') as f:
         metric_name = f.readline().strip()
-        import libscores, my_metric 
-        try: 
+        import libscores, my_metric
+        try:
             scoring_function = getattr(libscores, metric_name)
-        except: 
+        except:
             scoring_function = getattr(my_metric, metric_name)
     print 'Using scoring metric:', metric_name
             
@@ -161,11 +171,18 @@ if __name__=="__main__":
     D = DataManager(basename, input_dir) # Load data
     print D
     
-    # Here we define two models and compare them; you can define more than that
+    # Here we define models and compare them
     model_dict = {
-            'BasicPred': Predictor(),
-            'Pipeline': Pipeline([('prepro', Preprocessor()), ('predictor', Predictor())])}
-        
+            'RandomForest': RandomForestPredictor(50),
+            #'RandomForest20estimators': RandomForestPredictor(20),
+            #'RandomForest50estimators': RandomForestPredictor(50),
+            #'RandomForest100estimators': RandomForestPredictor(100),
+            'PipelineRandomForest': Pipeline([('prepro', Preprocessor()), ('predictor', RandomForestPredictor(50))])
+            #,'NewIdea': LinearRegression()
+            }
+    k=0
+    training_score = zeros([len(model_dict)])
+    cv_score = zeros([len(model_dict)])
     for key in model_dict:
         mymodel = model_dict[key]
         print("\n\n *** Model {:s}:{:s}".format(key,model_dict[key].__str__()))
@@ -182,15 +199,13 @@ if __name__=="__main__":
         
         # Cross-validation predictions
         print("Cross-validating")
-        from sklearn.model_selection import KFold
-        from numpy import zeros  
         n = 10 # 10-fold cross-validation
         kf = KFold(n_splits=n)
         kf.get_n_splits(X_train)
         Ypred_cv = zeros(Ypred_tr.shape)
         i=1
         for train_index, test_index in kf.split(X_train):
-            print("Fold{:d}".format(i))
+            print("Fold {}".format(i))
             Xtr, Xva = X_train[train_index], X_train[test_index]
             Ytr, Yva = Y_train[train_index], Y_train[test_index]
             mymodel.fit(Xtr, Ytr)
@@ -199,9 +214,22 @@ if __name__=="__main__":
             
 
         # Compute and print performance
-        training_score = scoring_function(Y_train, Ypred_tr)
-        cv_score = scoring_function(Y_train, Ypred_cv)
+        training_score[k] = scoring_function(Y_train, Ypred_tr)
+        cv_score[k] = scoring_function(Y_train, Ypred_cv)
         
         print("\nRESULTS FOR SCORE {:s}".format(metric_name))
-        print("TRAINING SCORE= {:f}".format(training_score))
-        print("CV SCORE= {:f}".format(cv_score))
+        print("TRAINING SCORE= {:f}".format(training_score[k]))
+        print("CV SCORE= {:f}".format(cv_score[k]))
+        
+        k = k+1
+    
+    print("\nGlobal results : \n\n")
+    
+    print("TRAINING SCORE WITH THE DIFFERENT REGRESSORS: {}".format(dict(zip(model_dict.keys(),training_score))))
+    print("X-VALIDATION WITH THE DIFFERENT REGRESSORS: {}".format(dict(zip(model_dict.keys(),cv_score))))
+
+    print("RESULTS : {}".format(training_score))
+
+    
+    #plt.figure()
+    #plt.plot(training_score)
