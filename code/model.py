@@ -167,15 +167,8 @@ if __name__=="__main__":
     
     # Here we define models and compare them
     model_dict = {
-            'RandomForest':RandomForestRegressor(n_estimators=100),
-            'ExteraTree': ExtraTreesRegressor(n_estimators=100)
-            #'AdaBoostRandomForest': AdaBoostRegressor(RandomForestRegressor(n_estimators=50),learning_rate=1.0),
-            #'AdaBoostRandomForestLearningRate2': AdaBoostRegressor(RandomForestRegressor(n_estimators=50),learning_rate=2.0)
-            #'RandomForest20estimators': RandomForestPredictor(50)
-            #'RandomForest50estimators': RandomForestPredictor(50),
-            #'RandomForest100estimators': RandomForestPredictor(100),
-           # 'PipelineRandomForest': Pipeline([('prepro', Preprocessor()), ('predictor', Predictor())])
-            #,'NewIdea': LinearRegression()
+            'RandomForest':RandomForestRegressor(n_estimators=50),
+            'RandomForest+BaggingRegressor': BaggingRegressor(base_estimator=RandomForestRegressor(n_estimators=50))
             }
     k=0
     training_score = zeros([len(model_dict)])
