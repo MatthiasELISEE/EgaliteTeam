@@ -47,7 +47,7 @@ if __name__=="__main__":
     from data_manager import DataManager  # such as DataManager
     
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
-        input_dir = "../public_data" # Replace by correct path
+        input_dir = "../../public_data" # Replace by correct path
         output_dir = "../results" # Create this directory if it does not exist
     else:
         input_dir = argv[1]
