@@ -12,7 +12,7 @@ from os.path import isfile
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.base import  BaseEstimator
 
-from prepro import Preprocessor
+#from prepro import Preprocessor
 from sklearn.pipeline import Pipeline
 
 
@@ -29,10 +29,11 @@ class model:
         self.num_labels=1
         self.is_trained=False
         # The model should be defined in the constructor
-        self.mod = Pipeline([
-                ('preprocessing', Preprocessor()),
-                ('predictor', Predictor())
-                ])
+        self.mod = Predictor()
+        #Pipeline([
+        #        ('preprocessing', Preprocessor()),
+        #        ('predictor', Predictor())
+        #        ])
         print("MODEL=" + self.mod.__str__())
 
     def fit(self, X, y):
@@ -109,7 +110,7 @@ class Predictor(BaseEstimator):
     models, for which you choose the hyper-parameters.'''
     def __init__(self):
         '''This method initializes the predictor.'''
-        self.mod = RandomForestRegressor()
+        self.mod = 
         print("PREDICTOR=" + self.mod.__str__())
 
     def fit(self, X, y):
@@ -133,10 +134,10 @@ if __name__=="__main__":
     # Modify this class to serve as test
     
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
-        input_dir = "../public_data" # A remplacer par le bon chemin
+        input_dir = "../../public_data" # A remplacer par le bon chemin
         output_dir = "../results" # A remplacer par le bon chemin
-        code_dir = "../starting_kit/ingestion_program" # A remplacer par le bon chemin
-        metric_dir = "../starting_kit/scoring_program" # A remplacer par le bon chemin
+        code_dir = "../code" # A remplacer par le bon chemin
+        metric_dir = "../scoring_program" # A remplacer par le bon chemin
     else:
         input_dir = argv[1]
         output_dir = argv[2]
@@ -147,6 +148,7 @@ if __name__=="__main__":
     path.append (metric_dir)
     
     from sklearn.linear_model import LinearRegression
+    from sklearn.ensemble import BaggingRegressor, RandomForestRegressor, AdaBoostRegressor
     from sklearn.model_selection import KFold
     from numpy import zeros
     import matplotlib.pyplot as plt
@@ -167,9 +169,13 @@ if __name__=="__main__":
     
     # Here we define two models and compare them; you can define more than that
     model_dict = {
-            'BasicPred': Predictor(),
-            'Pipeline': Pipeline([('prepro', Preprocessor()), ('predictor', Predictor())]),
-            'NewIdea': LinearRegression()}
+            #'BasicPred': Predictor(),
+            #'Pipeline': Pipeline([('prepro', Preprocessor()), ('predictor', Predictor())]),
+            #'RandomForest': RandomForestRegressor(),
+            #'BaggingRegressor': BaggingRegressor(),
+            'forest+bag':Predictor()
+            #'+++': AdaBoostRegressor(BaggingRegressor(base_estimator=RandomForestRegressor()))
+            }
     k=0
     training_score = zeros([len(model_dict)])
     cv_score = zeros([len(model_dict)])

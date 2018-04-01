@@ -9,7 +9,7 @@ You must supply at least 4 methods:
 import pickle
 import numpy as np   # We recommend to use numpy arrays
 from os.path import isfile
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, BaggingRegressor, AdaBoostRegressor
 from sklearn.base import  BaseEstimator
 
 from prepro import Preprocessor
@@ -30,7 +30,7 @@ class model:
         self.is_trained=False
         # The model should be defined in the constructor
         self.mod = Pipeline([
-                ('preprocessing', Preprocessor()),
+                 ('preprocessing', Preprocessor()),
                 ('predictor', Predictor())
                 ])
         print("MODEL=" + self.mod.__str__())
@@ -109,7 +109,7 @@ class Predictor(BaseEstimator):
     models, for which you choose the hyper-parameters.'''
     def __init__(self):
         '''This method initializes the predictor.'''
-        self.mod = RandomForestRegressor()
+        self.mod = BaggingRegressor(base_estimator=RandomForestRegressor(n_estimators=50))
         print("PREDICTOR=" + self.mod.__str__())
 
     def fit(self, X, y):
@@ -127,17 +127,11 @@ class Predictor(BaseEstimator):
     def load(self, path="./"):
         self = pickle.load(open(path + '_model.pickle'))
         return self
-    
-class RandomForestPredictor(Predictor):
-    def __init__(self, n_estimators):
-        '''This method initializes the predictor.'''
-        self.mod = RandomForestRegressor(n_estimators = n_estimators, max_depth=10)
-        print("PREDICTOR=" + self.mod.__str__())
  
 from sys import argv, path      
 if __name__=="__main__":
     # Modify this class to serve as test
-    
+        
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
         input_dir = "../../public_data" # A remplacer par le bon chemin
         output_dir = "../results" # A remplacer par le bon chemin
@@ -173,11 +167,14 @@ if __name__=="__main__":
     
     # Here we define models and compare them
     model_dict = {
-            'RandomForest': RandomForestPredictor(50)
-            #'RandomForest20estimators': RandomForestPredictor(20),
+            'RandomForest':RandomForestRegressor(n_estimators=100),
+            'ExteraTree': ExtraTreesRegressor(n_estimators=100)
+            #'AdaBoostRandomForest': AdaBoostRegressor(RandomForestRegressor(n_estimators=50),learning_rate=1.0),
+            #'AdaBoostRandomForestLearningRate2': AdaBoostRegressor(RandomForestRegressor(n_estimators=50),learning_rate=2.0)
+            #'RandomForest20estimators': RandomForestPredictor(50)
             #'RandomForest50estimators': RandomForestPredictor(50),
             #'RandomForest100estimators': RandomForestPredictor(100),
-            #'PipelineRandomForest': Pipeline([('prepro', Preprocessor()), ('predictor', RandomForestPredictor(100))])
+           # 'PipelineRandomForest': Pipeline([('prepro', Preprocessor()), ('predictor', Predictor())])
             #,'NewIdea': LinearRegression()
             }
     k=0

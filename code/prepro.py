@@ -16,6 +16,16 @@ Replace it with programs that:
 from sklearn.base import BaseEstimator
 from sklearn.decomposition import PCA
 
+class NothingTransformer:
+    def fit(self, X, y):
+        return X
+    def fit_transform(self, X):
+        return X
+    def transform(self, X):
+        return X
+    def __str__(self) :
+        return "Don't worry : Nothing's happening"
+
 class Preprocessor(BaseEstimator):
     def __init__(self):
         '''
@@ -23,7 +33,7 @@ class Preprocessor(BaseEstimator):
         Add also some defensive programming code, like the (calculated) 
         dimensions of the transformed X matrix.
         '''
-        self.transformer = PCA(n_components=10)
+        self.transformer = NothingTransformer()
         print("PREPROCESSOR=" + self.transformer.__str__())
 
     def fit(self, X, y=None):
