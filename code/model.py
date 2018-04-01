@@ -141,7 +141,7 @@ if __name__=="__main__":
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
         input_dir = "../../public_data" # A remplacer par le bon chemin
         output_dir = "../results" # A remplacer par le bon chemin
-        code_dir = "../ingestion_program" # A remplacer par le bon chemin
+        code_dir = "../ingestion" # A remplacer par le bon chemin
         metric_dir = "../scoring_program" # A remplacer par le bon chemin
     else:
         input_dir = argv[1]
@@ -166,18 +166,18 @@ if __name__=="__main__":
             scoring_function = getattr(my_metric, metric_name)
     print 'Using scoring metric:', metric_name
             
-    from data_manager import DataManager    
+    from data_manager import DataManager
     basename = 'houseprice'
     D = DataManager(basename, input_dir) # Load data
     print D
     
     # Here we define models and compare them
     model_dict = {
-            'RandomForest': RandomForestPredictor(50),
+            'RandomForest': RandomForestPredictor(50)
             #'RandomForest20estimators': RandomForestPredictor(20),
             #'RandomForest50estimators': RandomForestPredictor(50),
             #'RandomForest100estimators': RandomForestPredictor(100),
-            'PipelineRandomForest': Pipeline([('prepro', Preprocessor()), ('predictor', RandomForestPredictor(50))])
+            #'PipelineRandomForest': Pipeline([('prepro', Preprocessor()), ('predictor', RandomForestPredictor(100))])
             #,'NewIdea': LinearRegression()
             }
     k=0
