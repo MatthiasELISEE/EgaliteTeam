@@ -43,7 +43,7 @@ if __name__=="__main__":
     
     # To make sure this runs on Codalab, put here things that will not be executed on Codalab
     from sys import argv, path
-    path.append ("../ingestion_program") # Contains libraries you will need
+    path.append ("../ingestion") # Contains libraries you will need
     from data_manager import DataManager  # such as DataManager
     
     if len(argv)==1: # Use the default input and output directories if no arguments are provided
